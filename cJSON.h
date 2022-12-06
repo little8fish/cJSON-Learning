@@ -30,7 +30,7 @@ extern "C"
 #endif
 
 /* cJSON Types: */
-#define cJSON_False 0
+#define cJSON_False 0  // 宏定义，在预处理阶段进行替换，无类型检查
 #define cJSON_True 1
 #define cJSON_NULL 2
 #define cJSON_Number 3
@@ -54,18 +54,18 @@ typedef struct cJSON {
 	double valuedouble;			/* The item's number, if type==cJSON_Number */
 
 	char *string;				/* The item's name string, if this item is the child of, or is in the list of subitems of an object. */
-} cJSON;
+} cJSON;  // 这里的typedef 起到一个给别名的作用
 
 // 结构体，拥有两个函数指针
 typedef struct cJSON_Hooks {
-      void *(*malloc_fn)(size_t sz);
+      void *(*malloc_fn)(size_t sz); // malloc_fn是一个指针，指向这种类型的函数
       void (*free_fn)(void *ptr);
 } cJSON_Hooks;
 
 /* Supply malloc, realloc and free functions to cJSON */
-extern void cJSON_InitHooks(cJSON_Hooks* hooks);
+extern void cJSON_InitHooks(cJSON_Hooks* hooks); // 加上extern表明这里只是声明，定义在别的文件中
 
-
+// 主要就是Parse和Print函数
 /* Supply a block of JSON, and this returns a cJSON object you can interrogate. Call cJSON_Delete when finished. */
 extern cJSON *cJSON_Parse(const char *value);
 /* Render a cJSON entity to text for transfer/storage. Free the char* when finished. */

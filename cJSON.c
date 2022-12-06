@@ -49,14 +49,15 @@ static const char *ep;
 
 const char *cJSON_GetErrorPtr(void) {return ep;}
 
+// 比较字符串，不区分大小写，如果相同就为0；
 static int cJSON_strcasecmp(const char *s1,const char *s2)
 {
-	if (!s1) return (s1==s2)?0:1;if (!s2) return 1;
+	if (!s1) return (s1==s2)?0:1;if (!s2) return 1; 
 	for(; tolower(*s1) == tolower(*s2); ++s1, ++s2)	if(*s1 == 0)	return 0;
 	return tolower(*(const unsigned char *)s1) - tolower(*(const unsigned char *)s2);
 }
 
-// 定义两个函数指针
+// 定义两个函数指针,全局变量
 static void *(*cJSON_malloc)(size_t sz) = malloc;
 static void (*cJSON_free)(void *ptr) = free;
 
@@ -67,21 +68,21 @@ static char* cJSON_strdup(const char* str)
       char* copy;
 
       len = strlen(str) + 1;
-      if (!(copy = (char*)cJSON_malloc(len))) return 0;
-      memcpy(copy,str,len);
+      if (!(copy = (char*)cJSON_malloc(len))) return 0; // 分配len大小内存，该内存装字符串，首地址给copy指针
+      memcpy(copy,str,len); // memcpy memset 都是给指针指向的地方赋值
       return copy;
 }
 
-// 初始化结构体
+// 用hooks初始化两个函数指针, !hooks 和 hooks->malloc_fn  是否为true
 void cJSON_InitHooks(cJSON_Hooks* hooks)
 {
-    if (!hooks) { /* Reset hooks */
+    if (!hooks) { /* Reset hooks */ // 如果指针为空，直接初始化cJSON_malloc和cJSON_free
         cJSON_malloc = malloc;
         cJSON_free = free;
         return;
     }
-
-	cJSON_malloc = (hooks->malloc_fn)?hooks->malloc_fn:malloc;
+	// 初始化cJSON_malloc和cJSON_free
+	cJSON_malloc = (hooks->malloc_fn)?hooks->malloc_fn:malloc; // hooks->malloc_fn不为空则赋给cJSON_malloc, 下面同理
 	cJSON_free	 = (hooks->free_fn)?hooks->free_fn:free;
 }
 
@@ -93,7 +94,7 @@ static cJSON *cJSON_New_Item(void)
 	return node;
 }
 
-/* Delete a cJSON structure. */
+/* Delete a cJSON structure. */ // 指针有指向即不为空， 指针指向的东西本身不为空
 void cJSON_Delete(cJSON *c)
 {
 	cJSON *next;
@@ -103,7 +104,7 @@ void cJSON_Delete(cJSON *c)
 		if (!(c->type&cJSON_IsReference) && c->child) cJSON_Delete(c->child); // 递归删除child
 		if (!(c->type&cJSON_IsReference) && c->valuestring) cJSON_free(c->valuestring); // 释放指针 不应该是自己申请的内存才去释放吗？
 		if (!(c->type&cJSON_StringIsConst) && c->string) cJSON_free(c->string);
-		cJSON_free(c);
+		cJSON_free(c); // c是cJSON指针，当然是申请的
 		c=next;
 	}
 }
